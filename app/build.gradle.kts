@@ -73,7 +73,8 @@ dependencies {
     implementation(libs.koin.core)
     implementation(libs.koin.android)
     implementation(libs.koin.compose) // If you're using Jetpack Compose
-
-
-
 }
+
+//objectbox {
+//    enableKotlinBinding.set(true)
+//}
