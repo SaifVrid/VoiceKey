@@ -66,6 +66,14 @@ dependencies {
     // ObjectBox
     implementation(libs.objectbox.android)
     implementation(libs.objectbox.kotlin)
+    // Coroutines
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+    //Koin
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
+    implementation(libs.koin.compose) // If you're using Jetpack Compose
+
 
 
 }
