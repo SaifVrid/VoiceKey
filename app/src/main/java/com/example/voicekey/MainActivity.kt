@@ -8,6 +8,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
+import cafe.adriel.voyager.navigator.Navigator
+import com.example.voicekey.ui.screens.voiceRecordScreen.VoiceRecordScreen
 import com.example.voicekey.ui.theme.VoiceKeyTheme
 
 class MainActivity : ComponentActivity() {
@@ -18,7 +20,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             VoiceKeyTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) {
-
+                    Navigator(screen = VoiceRecordScreen)
                 }
             }
         }

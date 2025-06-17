@@ -73,6 +73,11 @@ dependencies {
     implementation(libs.koin.core)
     implementation(libs.koin.android)
     implementation(libs.koin.compose) // If you're using Jetpack Compose
+    // Core navigation system
+    implementation(libs.voyager.navigator)
+// Screen model = like ViewModel (stateholder)
+    implementation(libs.voyager.screenmodel)
+
 }
 
 //objectbox {
