@@ -1,5 +1,6 @@
 package com.example.voicekey.ui.screens.voiceRecordScreen
 
+
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -20,15 +21,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -36,43 +44,39 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.voicekey.ui.components.ModernRecordButton
+import org.koin.compose.koinInject
 import kotlin.math.sin
 
-
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-
-// ... existing imports ...
 
 object VoiceRecordScreen : Screen {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        var isRecording by remember { mutableStateOf(false) }
+        val saveUseCase: SaveRecordedVoiceUseCase = koinInject() // ✅ Composable scope
+
+        val screenModel = rememberScreenModel {
+            VoiceRecordScreenModel(saveUseCase) // ✅ Pure Kotlin lambda
+        }
+
+
+
+        val uiState by screenModel.uiState.collectAsState()
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            // Modern Top App Bar
             TopAppBar(
                 title = {
                     Text(
@@ -96,14 +100,12 @@ object VoiceRecordScreen : Screen {
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color(0xFF0F3460),
-
                 ),
                 modifier = Modifier.statusBarsPadding()
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Main content
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -111,19 +113,22 @@ object VoiceRecordScreen : Screen {
                 verticalArrangement = Arrangement.Bottom
             ) {
                 VoiceRecordCard(
-                    isRecording = isRecording,
-                    onRecordToggle = { isRecording = it }
+                    isRecording = uiState.isRecording,
+                    countdown = uiState.countdown,
+                    onRecordToggle = { screenModel.toggleRecording() }
                 )
             }
         }
     }
+
 }
 
 // ... rest of the code remains the same ...
 @Composable
 fun VoiceRecordCard(
     isRecording: Boolean,
-    onRecordToggle: (Boolean) -> Unit
+    countdown: Int,
+    onRecordToggle: () -> Unit
 ) {
     val containerColor by animateColorAsState(
         targetValue = if (isRecording) Color(0xFF1A1A2E) else Color(0xFF16213E),
@@ -159,15 +164,18 @@ fun VoiceRecordCard(
                     modifier = Modifier
                         .weight(1f)
                         .padding(16.dp),
-                    isRecording = isRecording
+                    isRecording = isRecording,
+                    countdownSeconds = countdown,
+                    onRecordToggle = onRecordToggle
                 )
+
 
                 // Modern record button with pulsation
                 ModernRecordButton(
                     modifier = Modifier.padding(5.dp)
                         .fillMaxHeight(),
                     isRecording = isRecording,
-                    onRecordToggle = onRecordToggle,
+                    onRecordToggle = {onRecordToggle()},
                     buttonSize = 70.dp
                 )
             }
@@ -178,12 +186,16 @@ fun VoiceRecordCard(
 @Composable
 fun RecordingStatus(
     modifier: Modifier = Modifier,
-    isRecording: Boolean
+    isRecording: Boolean,
+    countdownSeconds: Int,
+    onRecordToggle: () -> Unit
 ) {
     val animatedAlpha by animateFloatAsState(
         targetValue = if (isRecording) 1f else 0.6f,
         animationSpec = tween(300)
     )
+
+    val formattedTime = String.format("%02d:%02d", countdownSeconds / 60, countdownSeconds % 60)
 
     Column(modifier = modifier.alpha(animatedAlpha)) {
         Text(
@@ -195,22 +207,15 @@ fun RecordingStatus(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        if (isRecording) {
-            // Timer would be implemented here in a real app
-            Text(
-                text = "00:15",
-                color = Color(0xFFE94560),
-                fontSize = 14.sp
-            )
-        } else {
-            Text(
-                text = "Press mic to start",
-                color = Color.White.copy(alpha = 0.7f),
-                fontSize = 14.sp
-            )
-        }
+        Text(
+            text = if (isRecording) formattedTime else "Press mic to start",
+            color = if (isRecording) Color(0xFFE94560) else Color.White.copy(alpha = 0.7f),
+            fontSize = 14.sp
+        )
     }
 }
+
+
 
 @Composable
 fun WaveBackground(
@@ -238,8 +243,7 @@ fun WaveBackground(
             moveTo(0f, size.height)
 
             for (x in 0..size.width.toInt() step 10) {
-                val y =
-                    (sin(x / 100f + phase) * waveHeight + size.height * 0.7f)
+                val y = (sin(x / 100f + phase) * waveHeight + size.height * 0.7f)
                         lineTo(x.toFloat(), y)
             }
             lineTo(size.width, size.height)
