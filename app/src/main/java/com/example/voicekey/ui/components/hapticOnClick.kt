@@ -1,4 +1,4 @@
-package com.example.voicekey.utils
+package com.example.voicekey.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.Modifier
