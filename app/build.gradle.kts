@@ -63,6 +63,8 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    //Extended Icons
+    implementation(libs.androidx.material.icons.extended)
     // ObjectBox
     implementation(libs.objectbox.android)
     implementation(libs.objectbox.kotlin)
@@ -75,11 +77,8 @@ dependencies {
     implementation(libs.koin.compose) // If you're using Jetpack Compose
     // Core navigation system
     implementation(libs.voyager.navigator)
-// Screen model = like ViewModel (stateholder)
+    // Screen model = like ViewModel (stateholder)
     implementation(libs.voyager.screenmodel)
 
 }
 
-//objectbox {
-//    enableKotlinBinding.set(true)
-//}
